@@ -20,7 +20,9 @@ const DEFAULTS: Opts = {
   radius: 2,
 };
 
-const REPO_URL = 'https://github.com/zoricl/github-chart-api';
+const REPO_OWNER = 'iamnotluka';
+const REPO_NAME = 'github-chart-api';
+const REPO_URL = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
 
 export default function Home() {
   const [opts, setOpts] = useState<Opts>(DEFAULTS);
@@ -28,9 +30,25 @@ export default function Home() {
   const [origin, setOrigin] = useState('');
   const [copied, setCopied] = useState(false);
   const [colorText, setColorText] = useState(DEFAULTS.color);
+  const [stars, setStars] = useState<number | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d && typeof d.stargazers_count === 'number') {
+          setStars(d.stargazers_count);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -94,21 +112,12 @@ export default function Home() {
               <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z" />
             </svg>
             <span>Star</span>
+            {stars !== null && <span className="star-count">{formatStars(stars)}</span>}
           </a>
         </div>
       </header>
 
       <main className="container">
-        <div className="hero-copy animate-fade-up">
-          <h1 className="hero-title">
-            Forge your <em>contribution</em> chart.
-          </h1>
-          <p className="hero-sub">
-            Beautifully customizable GitHub heatmaps for your README, portfolio, or
-            anywhere else you want to flex.
-          </p>
-        </div>
-
         <section className="hero-section animate-fade-up delay-1">
           <div className="username-row">
               <span className="at" aria-hidden="true">@</span>
@@ -240,4 +249,10 @@ function Field({ label, value, children }: { label: string; value?: string; chil
 
 function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatStars(n: number) {
+  if (n < 1000) return String(n);
+  const k = n / 1000;
+  return `${k >= 10 ? Math.round(k) : k.toFixed(1)}k`;
 }
