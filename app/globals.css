@@ -438,7 +438,7 @@ input, select, textarea, button { font: inherit; color: inherit; }
   .snippet { font-size: 11.5px; height: 40px; }
   .btn { height: 40px; }
   .field { gap: 6px; }
-  .input, select.input, .username-input { height: 38px; font-size: 16px; }
+  .input, select.input, .username-input { height: 38px; }
 }
 
 .field { display: flex; flex-direction: column; gap: 8px; }
@@ -576,3 +576,8 @@ input[type="range"]::-moz-range-thumb {
 .animate-fade-up { animation: fade-up .5s cubic-bezier(.32,.72,0,1) both; }
 .animate-fade-up.delay-1 { animation-delay: .08s; }
 .animate-fade-up.delay-2 { animation-delay: .16s; }
+
+/* Prevent iOS Safari from zooming on input focus (font-size must be >= 16px). */
+@media (max-width: 720px) {
+  .input, select.input, .username-input { font-size: 16px; height: 38px; }
+}
